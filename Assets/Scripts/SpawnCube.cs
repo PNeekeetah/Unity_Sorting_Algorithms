@@ -117,8 +117,10 @@ public class SpawnCube : MonoBehaviour
     }
     IEnumerator Sort() {
         List<IEnumerator> coroutines = new List<IEnumerator>();
-        for (int i = 0; i < cube_list.Count; i++) {
-            for (int j = i; j < cube_list.Count; j++) {
+        int cubes_start = cube_list.Count - number_of_cubes;
+        int cubes_end = cube_list.Count;
+        for (int i = cubes_start; i < cubes_end; i++) {
+            for (int j = i; j < cubes_end; j++) {
                 if (cube_list[i].transform.localScale.y > cube_list[j].transform.localScale.y) {
                     Debug.Log("Smaller");
                     Vector3 smaller_position = cube_list[j].transform.position; // smaller first
