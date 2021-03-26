@@ -58,9 +58,9 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\SpawnCube.cs" />
     <Compile Include="Assets\Scripts\RandomMovingObject.cs" />
-    <Compile Include="Assets\Scripts\YieldScript.cs" />
-    <Compile Include="Assets\Scripts\Move.cs" />
     <Compile Include="Assets\Scripts\Utility.cs" />
+    <Compile Include="Assets\Scripts\YieldScript.cs" />
+    <Compile Include="Assets\Scripts\Controller.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

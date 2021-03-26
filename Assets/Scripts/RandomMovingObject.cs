@@ -9,7 +9,7 @@ public class RandomMovingObject : MonoBehaviour
     private Vector3 scale;
     private float speed;
     float distance = 0f;
-
+    
     public Vector3 ObjectScale{
         set{ scale = value; }
     }
