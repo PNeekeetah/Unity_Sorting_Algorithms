@@ -10,28 +10,18 @@ public class SpawnCube : MonoBehaviour
     private int number_of_cubes = 5;
     [SerializeField]
     private bool permute = true;
-
-    float ConvertRange(float position, float old_range_min, float old_range_max, float new_range_min, float new_range_max) {
-        return position * (new_range_max - new_range_min) / (old_range_max - old_range_min) + new_range_min;
-    }
-    Vector3 GetRandomPosition() 
-    {
-        float cube_x = ConvertRange(Random.value, 0.0f, 1.0f, -50.0f, 50.0f);
-        float cube_y = ConvertRange(Random.value, 0.0f, 1.0f, 0f, 10f);
-        float cube_z = ConvertRange(Random.value, 0.0f, 1.0f, -50.0f, 50.0f);
-        Vector3 spawn_position = new Vector3(cube_x, cube_y, cube_z);
-        return spawn_position;
-    }
+    private Utility utility;
 
     void Spawn()
     {
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.name = "Cube " + (cube_list.Count + 1);
-        Rigidbody trait = cube.AddComponent<Rigidbody>();
-        trait.freezeRotation = true;
-        cube.transform.position = GetRandomPosition();
-        cube.AddComponent<MoveObjects>();
-        cube_list.Add(cube);
+        GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube_list.Add(gameObject);
+        gameObject.GetComponent<Renderer>().material.color = Random.ColorHSV(0f, 1f, 0f, 1f, 0.25f, 0.75f);
+        gameObject.transform.position = new Vector3(0f, 10f, 0f);
+        gameObject.transform.localScale *= utility.ConvertRange(Random.value, 0.0f, 1.0f, 0.0f, 2.5f);
+        RandomMovingObject randomMovingObject = gameObject.AddComponent<RandomMovingObject>();
+        randomMovingObject.ObjectScale = gameObject.transform.localScale;
+        gameObject.name = "Cube " + cube_list.Count;
     }
 
     void Query() 
@@ -47,6 +37,7 @@ public class SpawnCube : MonoBehaviour
     void Start()
     {
         InvokeRepeating("CleanCubes", 10.0f, 10.0f);
+        utility = new Utility(-50f, 50f, 0f, 10f, -50f, 50f);
     }
 
     void CleanCubes() {
@@ -86,7 +77,7 @@ public class SpawnCube : MonoBehaviour
             float hue = c * color_increment;
             cube.GetComponent<Renderer>().material.color = Color.HSVToRGB(hue, 0.75f, 0.5f);
             Vector3 scale = new Vector3(1f, (float) c + 1.0f, 1f);
-            Vector3 position = new Vector3(ConvertRange(c, 0, number_of_cubes, x_axis_lower, x_axis_higher), y_axis, z_axis) ;
+            Vector3 position = new Vector3(utility.ConvertRange(c, 0, number_of_cubes, x_axis_lower, x_axis_higher), y_axis, z_axis) ;
             cube.transform.position = position;
             cube.transform.localScale = scale;
             cube_list.Add(cube);
