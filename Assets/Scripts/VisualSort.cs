@@ -39,6 +39,71 @@ public class VisualSort : MonoBehaviour
       yield return null;
     }
   }
+  // Your garden variety insertion sort. with boxes.
+  IEnumerator InsertionSort() 
+  {
+    coroutine_mutex = false;
+    int cubes_count = cubes_list.Count;
+    
+    for (int i = 0; i < cubes_count; i++)
+    {
+      int minimum_index = i;
+      for (int j = i + 1; j < cubes_count ; j++)
+      {
+        if (cubes_list[j].transform.localScale.y < cubes_list[minimum_index].transform.localScale.y) 
+        {
+          minimum_index = j;
+        }
+      }
+      if (minimum_index != i) 
+      { 
+        yield return StartCoroutine(SwapCubes(cubes_list[i], cubes_list[minimum_index]));
+        SwapReferences(cubes_list, i, minimum_index);
+      }
+    }
+  }
+  // 
+  IEnumerator DoubleInsertionSort()
+  {
+    coroutine_mutex = false;
+    int cubes_count = cubes_list.Count;
+    int first_pointer = 0;
+    int last_pointer = cubes_count - 1;
+    for (int i = first_pointer; i <= last_pointer; i++)
+    {
+      int minimum_index = first_pointer;
+      int maximum_index = last_pointer;
+      for (int j = i; j <= last_pointer; j++)
+      {
+        if (cubes_list[j].transform.localScale.y < cubes_list[minimum_index].transform.localScale.y)
+        {
+          minimum_index = j;
+        }
+        if (cubes_list[j].transform.localScale.y > cubes_list[maximum_index].transform.localScale.y)
+        {
+          maximum_index = j;
+        }
+      }
+      if (minimum_index != first_pointer)
+      {
+        if (maximum_index == first_pointer) // It can happen that the maximum index is the first pointer itself. 
+        {
+          maximum_index = minimum_index;    // Element at "minimum_index" will be swapped with "first_pointer", so maximum is updated.
+        }
+        yield return StartCoroutine(SwapCubes(cubes_list[first_pointer], cubes_list[minimum_index]));
+        SwapReferences(cubes_list, first_pointer, minimum_index);
+      }
+      if (maximum_index != last_pointer)
+      {
+        yield return StartCoroutine(SwapCubes(cubes_list[last_pointer], cubes_list[maximum_index]));
+        SwapReferences(cubes_list, last_pointer, maximum_index);
+      }
+      first_pointer++;
+      last_pointer--;
+    }
+    coroutine_mutex = true;
+  }
+
   // A basic O(n^2) sort. I don't even know which one it is, this used to be my go-to
   // sorting algorithm if I was ever required to sort an algorithm.
   // TODO: Turn Sort() into a Sort hub that calls Sort according to an enum or parameter.
@@ -48,7 +113,7 @@ public class VisualSort : MonoBehaviour
     int cubes_count = cubes_list.Count;
     for (int i = 0; i < cubes_count; i++)
     {
-      for (int j = i; j < cubes_count; j++)
+      for (int j = i + 1; j < cubes_count - 1; j++)
       {
         if (cubes_list[i].transform.localScale.y > cubes_list[j].transform.localScale.y)
         {
@@ -156,7 +221,7 @@ public class VisualSort : MonoBehaviour
     }
     if (Input.GetKeyDown(KeyCode.Keypad3) && coroutine_mutex)
     { 
-      StartCoroutine(Sort());
+      StartCoroutine(DoubleInsertionSort());
     }
   }
 }
