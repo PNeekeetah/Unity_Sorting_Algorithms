@@ -39,8 +39,8 @@ public class VisualSort : MonoBehaviour
       yield return null;
     }
   }
-  // Your garden variety insertion sort. with boxes.
-  IEnumerator InsertionSort() 
+  // Your garden variety selection sort. with boxes. Always attempts swapping with first element.
+  IEnumerator SelectionSort() 
   {
     coroutine_mutex = false;
     int cubes_count = cubes_list.Count;
@@ -62,8 +62,8 @@ public class VisualSort : MonoBehaviour
       }
     }
   }
-  // 
-  IEnumerator DoubleInsertionSort()
+  // Twice as fast! Too bad it doesn't mean much in terms of complexity.
+  IEnumerator DoubleSelectionSort()
   {
     coroutine_mutex = false;
     int cubes_count = cubes_list.Count;
@@ -221,7 +221,7 @@ public class VisualSort : MonoBehaviour
     }
     if (Input.GetKeyDown(KeyCode.Keypad3) && coroutine_mutex)
     { 
-      StartCoroutine(DoubleInsertionSort());
+      StartCoroutine(DoubleSelectionSort());
     }
   }
 }
