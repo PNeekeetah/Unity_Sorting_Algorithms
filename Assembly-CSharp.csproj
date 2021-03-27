@@ -61,6 +61,7 @@
     <Compile Include="Assets\Scripts\Utility.cs" />
     <Compile Include="Assets\Scripts\YieldScript.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
+    <Compile Include="Assets\Scripts\VisualSort.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

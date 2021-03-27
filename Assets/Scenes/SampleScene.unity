@@ -231,7 +231,8 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
-  - component: {fileID: 963194232}
+  - component: {fileID: 963194230}
+  - component: {fileID: 963194231}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -318,7 +319,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ROTATION_SPEED: 90
   TRANSLATION_SPEED: 100
---- !u!114 &963194232
+--- !u!114 &963194230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c70846107c6247440b845a396ceb5a3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  number_of_cubes: 49
+  both: 1
+--- !u!114 &963194231
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -330,8 +345,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ef9e1915e10b4144812b8f0c6d45c4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  number_of_cubes: 30
-  permute: 1
 --- !u!1 &980809546
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class YieldScript : MonoBehaviour
 {
+    // TODO : REMOVE OR REPURPOSE
     private Vector3 spot1 = new Vector3(25f, 1f, 25f);
     private Vector3 spot2 = new Vector3(-25f, 1f, -25f);
     private Vector3 position;
