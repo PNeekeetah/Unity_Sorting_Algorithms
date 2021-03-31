@@ -15,7 +15,8 @@ public class VisualSort : MonoBehaviour
   [SerializeField]
   private bool square = true;
   private bool coroutine_mutex = true;
-  private float rotation_speed = 180f;
+  private float rotation_speed = 180f; // degrees per second.
+  private const float ONE_SECOND = 1f;
   
   
   // Changes position of 1 cube at a time.
@@ -131,12 +132,17 @@ public class VisualSort : MonoBehaviour
   // Orbits around the rotational axis up until the final position
   IEnumerator MoveCircularArc(GameObject cube, Vector3 rotation_axis, Vector3 final_position)
   {
-    while ((cube.transform.position - final_position).magnitude > 0.1)
+    float start_angle = 0f;
+    float end_angle = rotation_speed * ONE_SECOND; // just to be extra explicit with regards to this being an ANGLE
+    while (start_angle < end_angle)
     {
-      cube.transform.RotateAround(rotation_axis, Vector3.up, rotation_speed * Time.deltaTime);
+      float time_increment = Time.deltaTime;
+      start_angle += rotation_speed * time_increment;
+      cube.transform.RotateAround(rotation_axis, Vector3.up, time_increment * rotation_speed);
       yield return null;
     }
-    cube.transform.position = final_position;
+    cube.transform.position = final_position;      // snaps box into place
+    cube.transform.rotation = Quaternion.identity; // forces correct rotation
     yield return null;
   }
   // Swaps 2 cubes in a circular motion
