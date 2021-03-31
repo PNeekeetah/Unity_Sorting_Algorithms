@@ -107,6 +107,25 @@ public class VisualSort : MonoBehaviour
       last_pointer--;
     }
     coroutine_mutex = true;
+
+  }
+  // Another jewel in the O(n^2) bunch of sorting algorithms.
+  IEnumerator InsertionSort() 
+  {
+    coroutine_mutex = false;
+    int cubes_count = cubes_list.Count;
+    for (int i = 1; i < cubes_count; i++)
+    {
+      int current_index = i;
+      while (current_index > 0 && 
+             (cubes_list[current_index].transform.localScale.y < cubes_list[current_index - 1].transform.localScale.y)) {
+        yield return StartCoroutine(SwapCubes(cubes_list[current_index], cubes_list[current_index-1]));
+        SwapReferences(cubes_list, current_index, current_index-1);
+        current_index--;
+      }
+    }
+    coroutine_mutex = true;
+
   }
 
   // A basic O(n^2) sort. I don't even know which one it is, this used to be my go-to
@@ -260,7 +279,7 @@ public class VisualSort : MonoBehaviour
     }
     if (Input.GetKeyDown(KeyCode.Keypad3) && coroutine_mutex)
     { 
-      StartCoroutine(DoubleSelectionSort());
+      StartCoroutine(InsertionSort());
     }
   }
 }
