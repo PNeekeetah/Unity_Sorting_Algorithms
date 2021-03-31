@@ -12,7 +12,11 @@ public class VisualSort : MonoBehaviour
   private int number_of_cubes = 5;
   [SerializeField]
   private bool both = true;
+  [SerializeField]
+  private bool square = true;
   private bool coroutine_mutex = true;
+  private float rotation_speed = 180f;
+  
   
   // Changes position of 1 cube at a time.
   // TODO : Add possibility to make circular translations. 
@@ -124,16 +128,45 @@ public class VisualSort : MonoBehaviour
     }
     coroutine_mutex = true;
   }
+  // Orbits around the rotational axis up until the final position
+  IEnumerator MoveCircularArc(GameObject cube, Vector3 rotation_axis, Vector3 final_position)
+  {
+    while ((cube.transform.position - final_position).magnitude > 0.1)
+    {
+      cube.transform.RotateAround(rotation_axis, Vector3.up, rotation_speed * Time.deltaTime);
+      yield return null;
+    }
+    cube.transform.position = final_position;
+    yield return null;
+  }
+  // Swaps 2 cubes in a circular motion
+  IEnumerator SwapCubesCircular(GameObject cube1, GameObject cube2)
+  {
+    Vector3 cube1_final_position = new Vector3(cube2.transform.position.x, cube1.transform.position.y, cube2.transform.position.z);
+    Vector3 cube2_final_position = new Vector3(cube1.transform.position.x, cube2.transform.position.y, cube1.transform.position.z);
+    Vector3 rotational_axis = (cube1_final_position + cube2_final_position) / 2;
+    StartCoroutine(MoveCircularArc(cube1, rotational_axis, cube1_final_position));
+    yield return StartCoroutine(MoveCircularArc(cube2, rotational_axis, cube2_final_position));
+  }
+
+
   // Moves around the boxes in the screen to reflect changes in the list.
   IEnumerator SwapCubes(GameObject cube1, GameObject cube2) {
     Vector3 cube1_final_position = new Vector3 (cube2.transform.position.x, cube1.transform.position.y, cube2.transform.position.z);
     Vector3 cube2_final_position = new Vector3 (cube1.transform.position.x, cube2.transform.position.y, cube1.transform.position.z);
     if (both)
     {
-      yield return StartCoroutine(Translate2Cubes(cube1, cube2, cube1.transform.position + Vector3.forward, cube2.transform.position - Vector3.forward));
-      yield return StartCoroutine(Translate2Cubes(cube1, cube2, cube1_final_position + Vector3.forward, cube2_final_position - Vector3.forward));
-      yield return StartCoroutine(Translate2Cubes(cube1, cube2, cube1_final_position, cube2_final_position));
-    }
+      if (square)
+      {
+        yield return StartCoroutine(Translate2Cubes(cube1, cube2, cube1.transform.position + Vector3.forward, cube2.transform.position - Vector3.forward));
+        yield return StartCoroutine(Translate2Cubes(cube1, cube2, cube1_final_position + Vector3.forward, cube2_final_position - Vector3.forward));
+        yield return StartCoroutine(Translate2Cubes(cube1, cube2, cube1_final_position, cube2_final_position));
+      }
+      else 
+      {
+        yield return StartCoroutine(SwapCubesCircular(cube1, cube2));
+      }
+  }
     else 
     { 
       yield return StartCoroutine(TranslateCube(cube1, cube1.transform.position + Vector3.forward));
