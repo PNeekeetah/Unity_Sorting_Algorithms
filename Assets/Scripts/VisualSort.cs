@@ -127,6 +127,40 @@ public class VisualSort : MonoBehaviour
     coroutine_mutex = true;
 
   }
+  // The hate child of Merge Sort and Insertion Sort. Takes only the worst qualities of each! 
+  IEnumerator MergeInsertionSort(int min_index, int max_index)
+  {
+    int mid_index = (max_index + min_index) / 2;
+    if (min_index + 1 >= max_index)
+    {
+      yield return null;
+    }
+    else
+    { 
+      yield return StartCoroutine(MergeInsertionSort(min_index, mid_index));
+      yield return StartCoroutine(MergeInsertionSort(mid_index, max_index));
+      int pointer1 = min_index;
+      int pointer2 = mid_index;
+      while (pointer1 < mid_index) 
+      {
+        if (cubes_list[pointer1].transform.localScale.y > cubes_list[pointer2].transform.localScale.y)
+        {
+          yield return StartCoroutine(SwapCubes(cubes_list[pointer1], cubes_list[pointer2]));
+          SwapReferences(cubes_list, pointer1, pointer2);
+          int current_index = pointer2;
+d          while (current_index + 1 < max_index  &&
+                 cubes_list[current_index].transform.localScale.y > cubes_list[current_index + 1].transform.localScale.y)
+          {
+            yield return StartCoroutine(SwapCubes(cubes_list[current_index], cubes_list[current_index+1]));
+            SwapReferences(cubes_list, current_index, current_index+1);
+            current_index++;
+          }
+        }
+        pointer1++;
+      }
+      yield return null;
+    }
+  }
 
   // A basic O(n^2) sort. I don't even know which one it is, this used to be my go-to
   // sorting algorithm if I was ever required to sort an algorithm.
@@ -279,7 +313,7 @@ public class VisualSort : MonoBehaviour
     }
     if (Input.GetKeyDown(KeyCode.Keypad3) && coroutine_mutex)
     { 
-      StartCoroutine(InsertionSort());
+      StartCoroutine(MergeInsertionSort(0,cubes_list.Count));
     }
   }
 }
