@@ -17,8 +17,8 @@ public class VisualSort : MonoBehaviour
   private bool coroutine_mutex = true;
   private float rotation_speed = 180f; // degrees per second.
   private const float ONE_SECOND = 1f;
-  
-  
+
+
   // Changes position of 1 cube at a time.
   // TODO : Add possibility to make circular translations. 
   IEnumerator TranslateCube(GameObject cube, Vector3 final_position)
@@ -32,7 +32,7 @@ public class VisualSort : MonoBehaviour
     }
   }
   // Changes positions of 2 cubes at a time - translation looks more symmetrical this way.
-  IEnumerator Translate2Cubes(GameObject cube1, GameObject cube2, Vector3 final_position1, Vector3 final_position2) 
+  IEnumerator Translate2Cubes(GameObject cube1, GameObject cube2, Vector3 final_position1, Vector3 final_position2)
   {
     float distance = 0.5f * Time.deltaTime;
     while (((cube1.transform.position - final_position1).magnitude > 0.0001) &&
@@ -45,27 +45,29 @@ public class VisualSort : MonoBehaviour
     }
   }
   // Your garden variety selection sort. with boxes. Always attempts swapping with first element.
-  IEnumerator SelectionSort() 
+  IEnumerator SelectionSort()
   {
     coroutine_mutex = false;
     int cubes_count = cubes_list.Count;
-    
+
     for (int i = 0; i < cubes_count; i++)
     {
       int minimum_index = i;
-      for (int j = i + 1; j < cubes_count ; j++)
+      for (int j = i + 1; j < cubes_count; j++)
       {
-        if (cubes_list[j].transform.localScale.y < cubes_list[minimum_index].transform.localScale.y) 
+        if (cubes_list[j].transform.localScale.y < cubes_list[minimum_index].transform.localScale.y)
         {
           minimum_index = j;
         }
       }
-      if (minimum_index != i) 
-      { 
+      if (minimum_index != i)
+      {
         yield return StartCoroutine(SwapCubes(cubes_list[i], cubes_list[minimum_index]));
         SwapReferences(cubes_list, i, minimum_index);
       }
     }
+    coroutine_mutex = true;
+
   }
   // Twice as fast! Too bad it doesn't mean much in terms of complexity.
   IEnumerator DoubleSelectionSort()
@@ -110,23 +112,31 @@ public class VisualSort : MonoBehaviour
 
   }
   // Another jewel in the O(n^2) bunch of sorting algorithms.
-  IEnumerator InsertionSort() 
+  IEnumerator InsertionSort()
   {
     coroutine_mutex = false;
     int cubes_count = cubes_list.Count;
     for (int i = 1; i < cubes_count; i++)
     {
       int current_index = i;
-      while (current_index > 0 && 
-             (cubes_list[current_index].transform.localScale.y < cubes_list[current_index - 1].transform.localScale.y)) {
-        yield return StartCoroutine(SwapCubes(cubes_list[current_index], cubes_list[current_index-1]));
-        SwapReferences(cubes_list, current_index, current_index-1);
+      while (current_index > 0 &&
+             (cubes_list[current_index].transform.localScale.y < cubes_list[current_index - 1].transform.localScale.y))
+      {
+        yield return StartCoroutine(SwapCubes(cubes_list[current_index], cubes_list[current_index - 1]));
+        SwapReferences(cubes_list, current_index, current_index - 1);
         current_index--;
       }
     }
     coroutine_mutex = true;
-
+  } 
+  // Setting the coroutine_mutex to false as part of a recursive call isn't such a great idea.
+  IEnumerator CallMergeInsertionSort(int min_index, int max_index) 
+  {
+    coroutine_mutex = false;
+    yield return StartCoroutine(MergeInsertionSort(min_index, max_index));
+    coroutine_mutex = true;
   }
+  
   // The hate child of Merge Sort and Insertion Sort. Takes only the worst qualities of each! 
   IEnumerator MergeInsertionSort(int min_index, int max_index)
   {
@@ -148,8 +158,8 @@ public class VisualSort : MonoBehaviour
           yield return StartCoroutine(SwapCubes(cubes_list[pointer1], cubes_list[pointer2]));
           SwapReferences(cubes_list, pointer1, pointer2);
           int current_index = pointer2;
-d          while (current_index + 1 < max_index  &&
-                 cubes_list[current_index].transform.localScale.y > cubes_list[current_index + 1].transform.localScale.y)
+          while ((current_index + 1 < max_index)  && 
+                  (cubes_list[current_index].transform.localScale.y > cubes_list[current_index + 1].transform.localScale.y))
           {
             yield return StartCoroutine(SwapCubes(cubes_list[current_index], cubes_list[current_index+1]));
             SwapReferences(cubes_list, current_index, current_index+1);
@@ -158,7 +168,6 @@ d          while (current_index + 1 < max_index  &&
         }
         pointer1++;
       }
-      yield return null;
     }
   }
 
@@ -313,7 +322,7 @@ d          while (current_index + 1 < max_index  &&
     }
     if (Input.GetKeyDown(KeyCode.Keypad3) && coroutine_mutex)
     { 
-      StartCoroutine(MergeInsertionSort(0,cubes_list.Count));
+      StartCoroutine(CallMergeInsertionSort(0,cubes_list.Count));
     }
   }
 }
