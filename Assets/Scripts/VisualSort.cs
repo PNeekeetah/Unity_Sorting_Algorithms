@@ -171,6 +171,80 @@ public class VisualSort : MonoBehaviour
     }
   }
 
+  IEnumerator MergePrepation(int min_index, int max_index) 
+  {
+    GameObject platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    platform.transform.position = new Vector3(0f, 0.5f, 10f);
+    platform.transform.localScale = new Vector3(2*(max_index - min_index + 1), 1f, 4f);
+    yield return MergeSort(min_index,max_index);
+    Destroy(platform);
+  }
+  IEnumerator MergeSort(int min_index, int max_index) 
+  {
+    int mid_index = (max_index + min_index) / 2;
+    if (min_index + 1 >= max_index)
+    {
+      yield return null;
+    }
+    else
+    {
+      yield return StartCoroutine(MergeSort(min_index, mid_index));
+      yield return StartCoroutine(MergeSort(mid_index, max_index));
+      int pointer1 = min_index;
+      int pointer2 = mid_index;
+      List<Vector3> old_position = new List<Vector3>();
+      List<GameObject> old_cubes = new List<GameObject>();
+      Vector3 transposition = new Vector3(0f, 1f, 10f);
+      // Save positions and cube references
+      for (int i = min_index; i < max_index; i++) {
+        old_position.Add(cubes_list[i].transform.position);
+        old_cubes.Add(cubes_list[i]);
+      }
+      // Transpose on the platform
+      for (int i = min_index; i < max_index; i++)
+      {
+        cubes_list[i].transform.position += transposition;
+      }
+      // Merge
+      int current_position_index = 0;
+      while (pointer1 < mid_index && pointer2 < max_index)
+      {
+        if (old_cubes[pointer1-min_index].transform.localScale.y <= old_cubes[pointer2-min_index].transform.localScale.y)
+        {
+          cubes_list[min_index + current_position_index] = old_cubes[pointer1 - min_index];
+          pointer1++;
+        }
+        else
+        {
+          cubes_list[min_index + current_position_index] = old_cubes[pointer2 - min_index];
+          pointer2++;
+        }
+        cubes_list[min_index + current_position_index].transform.position -= transposition;
+        SwapXZ(cubes_list[min_index + current_position_index], old_position[current_position_index]);
+        current_position_index++;
+        //yield return null;
+      }
+      while (pointer1 < mid_index) 
+      {
+        cubes_list[min_index + current_position_index] = old_cubes[pointer1 - min_index];
+        cubes_list[min_index + current_position_index].transform.position -= transposition;
+        SwapXZ(cubes_list[min_index + current_position_index], old_position[current_position_index]);
+        pointer1++;
+        current_position_index++;
+        //yield return null;
+      }
+      while (pointer2 < max_index)
+      {
+        cubes_list[min_index + current_position_index] = old_cubes[pointer2- min_index];
+        cubes_list[min_index + current_position_index].transform.position -= transposition;
+        SwapXZ(cubes_list[min_index + current_position_index], old_position[current_position_index]);
+        pointer2++;
+        current_position_index++;
+        //yield return null;
+      }
+    }
+  }
+
   // A basic O(n^2) sort. I don't even know which one it is, this used to be my go-to
   // sorting algorithm if I was ever required to sort an algorithm.
   // TODO: Turn Sort() into a Sort hub that calls Sort according to an enum or parameter.
@@ -191,7 +265,7 @@ public class VisualSort : MonoBehaviour
     }
     coroutine_mutex = true;
   }
-  // Orbits around the rotational axis up until the final position
+  // Orbits around the rotational axis up until the final position 
   IEnumerator MoveCircularArc(GameObject cube, Vector3 rotation_axis, Vector3 final_position)
   {
     float start_angle = 0f;
@@ -274,6 +348,12 @@ public class VisualSort : MonoBehaviour
       SpawnCube(index, color_increment);
     }      
   }
+  // Swaps the XZ component of the cube with the ones specified in the vector.
+  void SwapXZ(GameObject cube, Vector3 position) 
+  {
+    Vector3 cube1_new_position = new Vector3(position.x, cube.transform.position.y, position.z);
+    cube.transform.position = cube1_new_position;
+  }
   // Swaps the XZ components of the positions of 2 cubes.
   void SwapXZ(GameObject cube1, GameObject cube2)
   {
@@ -322,7 +402,7 @@ public class VisualSort : MonoBehaviour
     }
     if (Input.GetKeyDown(KeyCode.Keypad3) && coroutine_mutex)
     { 
-      StartCoroutine(CallMergeInsertionSort(0,cubes_list.Count));
+      StartCoroutine(MergePrepation(0,cubes_list.Count));
     }
   }
 }

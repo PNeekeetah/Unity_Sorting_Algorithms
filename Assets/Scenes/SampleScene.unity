@@ -331,7 +331,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c70846107c6247440b845a396ceb5a3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  number_of_cubes: 39
+  number_of_cubes: 4
   both: 1
   square: 0
 --- !u!114 &963194231
