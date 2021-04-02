@@ -173,11 +173,14 @@ public class VisualSort : MonoBehaviour
 
   IEnumerator MergePrepation(int min_index, int max_index) 
   {
+    coroutine_mutex = false;
     GameObject platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    platform.GetComponent<Renderer>().material.color = new Color(196f/255f, 174f/255f, 173f/255f);
     platform.transform.position = new Vector3(0f, 0.5f, 10f);
     platform.transform.localScale = new Vector3(2*(max_index - min_index + 1), 1f, 4f);
     yield return MergeSort(min_index,max_index);
     Destroy(platform);
+    coroutine_mutex = true;
   }
   IEnumerator MergeSort(int min_index, int max_index) 
   {
@@ -203,8 +206,10 @@ public class VisualSort : MonoBehaviour
       // Transpose on the platform
       for (int i = min_index; i < max_index; i++)
       {
-        cubes_list[i].transform.position += transposition;
+        StartCoroutine(LeapCircularArc(cubes_list[i], cubes_list[i].transform.position + transposition));
       }
+      yield return new WaitForSeconds(2f);
+
       // Merge
       int current_position_index = 0;
       while (pointer1 < mid_index && pointer2 < max_index)
@@ -219,28 +224,26 @@ public class VisualSort : MonoBehaviour
           cubes_list[min_index + current_position_index] = old_cubes[pointer2 - min_index];
           pointer2++;
         }
-        cubes_list[min_index + current_position_index].transform.position -= transposition;
-        SwapXZ(cubes_list[min_index + current_position_index], old_position[current_position_index]);
+        Vector3 cube_final_position = GetNewXZ(cubes_list[min_index + current_position_index].transform.position -transposition,old_position[current_position_index]);
+        yield return StartCoroutine(LeapCircularArc(cubes_list[min_index + current_position_index],cube_final_position));
         current_position_index++;
-        //yield return null;
       }
       while (pointer1 < mid_index) 
       {
         cubes_list[min_index + current_position_index] = old_cubes[pointer1 - min_index];
-        cubes_list[min_index + current_position_index].transform.position -= transposition;
-        SwapXZ(cubes_list[min_index + current_position_index], old_position[current_position_index]);
+
+        Vector3 cube_final_position = GetNewXZ(cubes_list[min_index + current_position_index].transform.position - transposition, old_position[current_position_index]);
+        yield return StartCoroutine(LeapCircularArc(cubes_list[min_index + current_position_index], cube_final_position));
         pointer1++;
         current_position_index++;
-        //yield return null;
       }
       while (pointer2 < max_index)
       {
         cubes_list[min_index + current_position_index] = old_cubes[pointer2- min_index];
-        cubes_list[min_index + current_position_index].transform.position -= transposition;
-        SwapXZ(cubes_list[min_index + current_position_index], old_position[current_position_index]);
+        Vector3 cube_final_position = GetNewXZ(cubes_list[min_index + current_position_index].transform.position - transposition, old_position[current_position_index]);
+        yield return StartCoroutine(LeapCircularArc(cubes_list[min_index + current_position_index], cube_final_position));
         pointer2++;
         current_position_index++;
-        //yield return null;
       }
     }
   }
@@ -281,6 +284,26 @@ public class VisualSort : MonoBehaviour
     cube.transform.rotation = Quaternion.identity; // forces correct rotation
     yield return null;
   }
+  // 
+  IEnumerator LeapCircularArc(GameObject cube, Vector3 final_position) 
+  {
+    float start_angle = 0f;
+    float end_angle = rotation_speed * ONE_SECOND;
+    Vector3 rotational_axis = (cube.transform.position + final_position) / 2;
+    Vector3 initial_pos = rotational_axis - cube.transform.position;
+    Vector3 cross = Vector3.Cross(initial_pos, -Vector3.up);
+    while (start_angle < end_angle) 
+    {
+      float time_increment = Time.deltaTime;
+      start_angle += rotation_speed * time_increment;
+      cube.transform.RotateAround(rotational_axis, cross, time_increment * rotation_speed);
+      yield return null;
+    }
+    cube.transform.position = final_position;      // snaps box into place
+    cube.transform.rotation = Quaternion.identity;
+    yield return null;
+  }
+  
   // Swaps 2 cubes in a circular motion
   IEnumerator SwapCubesCircular(GameObject cube1, GameObject cube2)
   {
@@ -348,6 +371,11 @@ public class VisualSort : MonoBehaviour
       SpawnCube(index, color_increment);
     }      
   }
+  //Get the final position of the cube if you were to swap it with a vector.
+  Vector3 GetNewXZ(Vector3 cube_position, Vector3 position) 
+  {
+    return new Vector3(position.x, cube_position.y, position.z);
+  }
   // Swaps the XZ component of the cube with the ones specified in the vector.
   void SwapXZ(GameObject cube, Vector3 position) 
   {
@@ -402,7 +430,7 @@ public class VisualSort : MonoBehaviour
     }
     if (Input.GetKeyDown(KeyCode.Keypad3) && coroutine_mutex)
     { 
-      StartCoroutine(MergePrepation(0,cubes_list.Count));
+      StartCoroutine(InsertionSort());
     }
   }
 }
